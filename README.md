@@ -5,6 +5,6 @@ Please note: When using the -d (decode) flag you no longer need to provide a fil
 file to been decoded, because it will automatically write the file with the supplied filename  
 in the Header.
 
-Example: $ base64+ -d data.txt (which writes then in the current directory for example example.png  
+Example: $ base64+ -d data.txt (which writes then in the current directory for example example.png
 or whatever filename was in the Header of the encoded message.
 
