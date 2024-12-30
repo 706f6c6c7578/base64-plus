@@ -85,7 +85,8 @@ func encodeFast(input io.Reader, output io.Writer, filename string) error {
 		}
 	}
 
-	fmt.Fprintf(output, "%s\t%d\t%x\n", filename, size, h.Sum(nil))
+	// Write header information vertically with a blank line after
+	fmt.Fprintf(output, "%s\n%d\n%x\n\n", filename, size, h.Sum(nil))
 
 	if f, ok := input.(*os.File); ok {
 		f.Seek(0, 0)
@@ -116,17 +117,30 @@ func encodeFast(input io.Reader, output io.Writer, filename string) error {
 func decodeFast(input io.Reader, output io.Writer) error {
 	reader := bufio.NewReader(input)
 
-	// Read and parse header
-	header, err := reader.ReadString('\n')
+	// Read header information line by line
+	filename, err := reader.ReadString('\n')
 	if err != nil {
 		return err
 	}
+	filename = strings.TrimSpace(filename)
 
-	parts := strings.Split(strings.TrimSpace(header), "\t")
-	if len(parts) != 3 {
-		return fmt.Errorf("invalid header format")
+	sizeStr, err := reader.ReadString('\n')
+	if err != nil {
+		return err
 	}
-	filename, sizeStr, originalHash := parts[0], parts[1], parts[2]
+	sizeStr = strings.TrimSpace(sizeStr)
+
+	originalHash, err := reader.ReadString('\n')
+	if err != nil {
+		return err
+	}
+	originalHash = strings.TrimSpace(originalHash)
+
+	// Read the blank line
+	_, err = reader.ReadString('\n')
+	if err != nil {
+		return err
+	}
 
 	// Create output file
 	outFile, err := os.Create(filename)
